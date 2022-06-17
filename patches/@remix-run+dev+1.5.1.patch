@@ -1,0 +1,37 @@
+diff --git a/node_modules/@remix-run/dev/compiler.js b/node_modules/@remix-run/dev/compiler.js
+index f975b71..7ac18e1 100644
+--- a/node_modules/@remix-run/dev/compiler.js
++++ b/node_modules/@remix-run/dev/compiler.js
+@@ -371,6 +371,7 @@ function createServerBuild(config, options, assetsManifestPromiseRef) {
+     platform: config.serverPlatform,
+     format: config.serverModuleFormat,
+     treeShaking: true,
++    metafile: true,
+     minify: options.mode === build$1.BuildMode.Production && isCloudflareRuntime,
+     mainFields: isCloudflareRuntime ? ["browser", "module", "main"] : config.serverModuleFormat === "esm" ? ["module", "main"] : ["main", "module"],
+     target: options.target,
+@@ -392,6 +393,12 @@ function createServerBuild(config, options, assetsManifestPromiseRef) {
+     plugins
+   }).then(async build => {
+     await writeServerBuildResult(config, build.outputFiles);
++    let analysis = await esbuild.analyzeMetafile(build.metafile, {
++      verbose: true,
++    })
++    var serverBuildDirectory = path__namespace.dirname(config.serverBuildPath)
++    await fs.writeFileSafe(path__namespace.join(serverBuildDirectory, 'meta.json'), JSON.stringify(build.metafile, null, 2));
++    await fs.writeFileSafe(path__namespace.join(serverBuildDirectory, 'bundle-analysis.txt'), analysis);
+     return build;
+   });
+ }
+@@ -401,6 +408,11 @@ async function generateAssetsManifest(config, metafile) {
+   let filename = `manifest-${assetsManifest.version.toUpperCase()}.js`;
+   assetsManifest.url = config.publicPath + filename;
+   await fs.writeFileSafe(path__namespace.join(config.assetsBuildDirectory, filename), `window.__remixManifest=${JSON.stringify(assetsManifest)};`);
++  let analysis = await esbuild.analyzeMetafile(metafile, {
++    verbose: true,
++  })
++  await fs.writeFileSafe(path__namespace.join(config.assetsBuildDirectory, 'meta.json'), JSON.stringify(metafile, null, 2));
++  await fs.writeFileSafe(path__namespace.join(config.assetsBuildDirectory, 'bundle-analysis.txt'), analysis);
+   return assetsManifest;
+ }
+ 
