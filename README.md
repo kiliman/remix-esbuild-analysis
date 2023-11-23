@@ -1,6 +1,6 @@
 # Remix esbuild bundle analysis patch
 
-This patch will add the [`--metafile`](https://esbuild.github.io/api/#metafile) option to the esbuild compiler. It generates a _meta.json_ file in the output directory for both client and server builds. You can upload the _meta.json_ file to [Bundle Buddy](https://bundle-buddy.com).
+This patch will add the [`--metafile`](https://esbuild.github.io/api/#metafile) option to the esbuild compiler. It generates a _meta.json_ file in the output directory for both client and server builds. You can upload the _meta.json_ file to [Bundle Buddy](https://bundle-buddy.com) or [esbuild Bundle Size Analyzer](https://esbuild.github.io/analyze).
 
 It also generates the _bundle-analsys.txt_ file which shows how modules were bundled and the size contributed to the final file.
 

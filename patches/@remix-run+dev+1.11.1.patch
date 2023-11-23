@@ -1,0 +1,44 @@
+diff --git a/node_modules/@remix-run/dev/dist/compiler/compileBrowser.js b/node_modules/@remix-run/dev/dist/compiler/compileBrowser.js
+index 8b5fb57..21662f7 100644
+--- a/node_modules/@remix-run/dev/dist/compiler/compileBrowser.js
++++ b/node_modules/@remix-run/dev/dist/compiler/compileBrowser.js
+@@ -167,6 +167,12 @@ const createBrowserCompiler = (remixConfig, options) => {
+         incremental: true
+       }) : appCompiler.rebuild());
+       invariant["default"](appCompiler.metafile, "Expected app compiler metafile to be defined. This is likely a bug in Remix. Please open an issue at https://github.com/remix-run/remix/issues/new");
++      const analysis = await esbuild.analyzeMetafile(appCompiler.metafile, {
++        verbose: true,
++      })
++      const browserBuildFolder = remixConfig.assetsBuildDirectory
++      fse__namespace.writeFileSync(path__namespace.join(browserBuildFolder, 'meta.json'), JSON.stringify(appCompiler.metafile, null, 2));
++      fse__namespace.writeFileSync(path__namespace.join(browserBuildFolder, 'bundle-analysis.txt'), analysis); 
+     };
+     let cssBuildTask = async () => {
+       var _outputFiles$find;
+diff --git a/node_modules/@remix-run/dev/dist/compiler/compilerServer.js b/node_modules/@remix-run/dev/dist/compiler/compilerServer.js
+index fa6bd05..f2529b5 100644
+--- a/node_modules/@remix-run/dev/dist/compiler/compilerServer.js
++++ b/node_modules/@remix-run/dev/dist/compiler/compilerServer.js
+@@ -170,12 +170,20 @@ const createServerCompiler = (remixConfig, options) => {
+   let compile = async manifestChannel => {
+     let esbuildConfig = createEsbuildConfig(remixConfig, manifestChannel, options);
+     let {
+-      outputFiles
++      outputFiles,
++      metafile
+     } = await esbuild__namespace.build({
+       ...esbuildConfig,
+-      write: false
++      write: false,
++      metafile: true
+     });
+     await writeServerBuildResult(remixConfig, outputFiles);
++    const analysis = await esbuild.analyzeMetafile(metafile, {
++      verbose: true,
++    })
++    const serverBuildFolder = path__namespace.dirname(remixConfig.serverBuildPath)
++    fse__namespace.writeFileSync(path__namespace.join(serverBuildFolder, 'meta.json'), JSON.stringify(metafile, null, 2));
++    fse__namespace.writeFileSync(path__namespace.join(serverBuildFolder, 'bundle-analysis.txt'), analysis);
+   };
+   return {
+     compile,
